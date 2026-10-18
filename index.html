@@ -37,7 +37,7 @@
             max-width: 600px;
         }
 
-        /* Шапка (только текст) */
+        /* Шапка */
         .header {
             text-align: center;
             margin-bottom: 30px;
@@ -141,8 +141,8 @@
             overflow-y: auto;
         }
 
-        .btn-copy {
-            margin-top: 12px;
+        .btn-action {
+            margin-top: 10px;
             width: 100%;
             background-color: #333;
             color: var(--text-primary);
@@ -155,11 +155,11 @@
             transition: background-color 0.2s;
         }
 
-        .btn-copy:hover {
+        .btn-action:hover {
             background-color: #444;
         }
 
-        .btn-copy.copied {
+        .btn-action.success {
             background-color: #2e7d32;
             border-color: #2e7d32;
         }
@@ -171,7 +171,7 @@
 <body>
 
     <div class="container">
-        <!-- Шапка без картинки-логотипа -->
+        <!-- Шапка -->
         <div class="header">
             <h1>auto_porsche_tj</h1>
         </div>
@@ -288,7 +288,8 @@
         <div class="card result-container" id="resultCard">
             <label>Сгенерированное объявление:</label>
             <div class="result-box" id="resultText"></div>
-            <button class="btn-copy" id="copyBtn" onclick="copyResult()">Скопировать</button>
+            <button class="btn-action" id="copyBtn" onclick="copyResult()">Скопировать</button>
+            <button class="btn-action" id="tgBtn" onclick="sendToTelegram()">Отправить в телеграм</button>
         </div>
     </div>
 
@@ -361,12 +362,64 @@
             navigator.clipboard.writeText(text).then(() => {
                 const copyBtn = document.getElementById('copyBtn');
                 copyBtn.textContent = 'Скопировано! ✓';
-                copyBtn.classList.add('copied');
+                copyBtn.classList.add('success');
                 
                 setTimeout(() => {
                     copyBtn.textContent = 'Скопировать';
-                    copyBtn.classList.remove('copied');
+                    copyBtn.classList.remove('success');
                 }, 2000);
+            });
+        }
+
+        function sendToTelegram() {
+            const text = document.getElementById('resultText').innerText;
+            
+            // ЗАМЕНИТЕ ЭТИ ДАННЫЕ СВОИМИ:
+            const botToken = "8944753021:AAFJlj0E7CU5V827md4prUVoIOP95AlIaOs"; 
+            const adminId = "6011486698";
+
+            if (botToken === "YOUR_BOT_TOKEN" || adminId === "YOUR_ADMIN_CHAT_ID") {
+                alert("Пожалуйста, укажите ваш Bot Token и Admin Chat ID в коде скрипта!");
+                return;
+            }
+
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const tgBtn = document.getElementById('tgBtn');
+
+            tgBtn.textContent = 'Отправка...';
+            tgBtn.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: adminId,
+                    text: text
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    tgBtn.textContent = 'Отправлено в Telegram! ✓';
+                    tgBtn.classList.add('success');
+                } else {
+                    alert("Ошибка отправки: " + (data.description || 'Неизвестная ошибка'));
+                    tgBtn.textContent = 'Отправить в телеграм';
+                }
+                
+                setTimeout(() => {
+                    tgBtn.textContent = 'Отправить в телеграм';
+                    tgBtn.classList.remove('success');
+                    tgBtn.disabled = false;
+                }, 2500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Ошибка сети при отправке.");
+                tgBtn.textContent = 'Отправить в телеграм';
+                tgBtn.disabled = false;
             });
         }
     </script>
