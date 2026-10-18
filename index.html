@@ -274,11 +274,14 @@
 
             <div class="form-group">
                 <label>🔄 Бартер</label>
-                <select id="barter">
-                    <option value="Не предусмотрен">Не предусмотрен</option>
-                    <option value="Возможен" selected>Возможен</option>
-                    <option value="Предусмотрен">Предусмотрен</option>
-                </select>
+                <div class="input-row">
+                    <select id="barterStatus" class="flex-1" onchange="toggleBarterInput()">
+                        <option value="Не предусмотрен" selected>Не предусмотрен</option>
+                        <option value="Возможен">Возможен</option>
+                        <option value="Предусмотрен">Предусмотрен</option>
+                    </select>
+                    <input type="text" id="barterCar" class="flex-1" placeholder="На какое авто" style="display:none;">
+                </div>
             </div>
 
             <button class="btn-submit" onclick="generatePost()">Применить</button>
@@ -309,6 +312,18 @@
             }
         }
 
+        function toggleBarterInput() {
+            const status = document.getElementById('barterStatus').value;
+            const carInput = document.getElementById('barterCar');
+            
+            if (status === 'Предусмотрен') {
+                carInput.style.display = 'block';
+            } else {
+                carInput.style.display = 'none';
+                carInput.value = '';
+            }
+        }
+
         function generatePost() {
             const phone = document.getElementById('phone').value;
             const model = document.getElementById('model').value;
@@ -329,11 +344,18 @@
             const utilization = document.getElementById('utilization').value;
             const condition = document.getElementById('condition').value;
             const price = document.getElementById('price').value;
-            const barter = document.getElementById('barter').value;
+            
+            const barterStatus = document.getElementById('barterStatus').value;
+            const barterCar = document.getElementById('barterCar').value;
 
             let tintingStr = "Нест";
             if (tintingStatus === 'Хаст' && tintingNumber) {
                 tintingStr = `${tintingNumber} ${tintingUnit}`;
+            }
+
+            let barterStr = barterStatus;
+            if (barterStatus === 'Предусмотрен' && barterCar) {
+                barterStr = `Предусмотрен (${barterCar})`;
             }
 
             let result = "";
@@ -350,7 +372,7 @@
             if (utilization) result += `♻️ Утилизация: ${utilization}\n`;
             if (condition) result += `🛠️ Состояние: ${condition}\n`;
             if (price) result += `💶 Цена: ${price} сомонӣ\n`;
-            if (barter) result += `🔄 Бартер: ${barter}`;
+            if (barterStr) result += `🔄 Бартер: ${barterStr}`;
 
             document.getElementById('resultText').innerText = result;
             document.getElementById('resultCard').style.display = 'block';
